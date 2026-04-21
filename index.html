@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirppiskierrätys</title>
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header-grid">
+        <div class="logo-container">
+            <img 
+        </div>
+        <div class="button-container">
+            <button class="storeb" onclick="window.location.href='store.html'">Kauppa</button>
+            <button class="frontpage" onclick="window.location.href='index.html'">Etusivu</button>
+            <button class="logoutbutton" id="logoutbutton" onclick="kirjauduUlos()">Kirjaudu ulos</button>
+        </div>
+    </header>
+
+    <div class="content">  
+        <!-- KIRJAUTUMISLOMAKE -->
+        <div class="login" id="loginform">
+            <h2>Kirjaudu sisään</h2>
+            <p id="loginerror" class="error-text" style="display:none;">Virheellinen käyttäjätunnus tai salasana</p>
+            <input type="text" id="username" placeholder="Käyttäjänimi">
+            <input type="password" id="userpassword" placeholder="Salasana">
+
+            <div class="loginbuttons">
+                <button class="loginbutton" onclick="kirjaudu()">Kirjaudu sisään</button>
+                <button class="loginbutton" onclick="peruutaKirjautuminen()">Peruuta</button>
+            </div>
+            <h3>Tai</h3>
+            <button class="registerbutton" onclick="avaaRekisterointi()">Rekisteröidy tästä</button>
+        </div>
+
+        <!-- REKISTERÖINTILOMAKE -->
+        <div class="register" id="registerform" style="display:none;">
+            <h2>Rekisteröidy</h2>
+            <p id="registererror" class="error-text"></p>
+            <input type="text" id="newUsername" placeholder="Valitse käyttäjänimi">
+            <input type="email" id="email" placeholder="Sähköposti">
+            <input type="date" id="birthdate">
+            <input type="password" id="newPassword" placeholder="Valitse salasana">
+            <input type="password" id="confirmPassword" placeholder="Syötä salasana uudelleen">
+
+            <div class="createbuttons">
+                <button class="createbutton" onclick="rekisteroidy()">Luo tili</button>
+                <button class="cancelbutton" onclick="peruutaRekisterointi()">Peruuta</button>
+            </div>
+        </div>
+
+        <!-- TERVETULOA-VIESTI (Näkyy kun kirjautunut) -->
+        <div id="welcome-area" style="display:none; text-align: center; margin-top: 50px;">
+            <h1 id="welcome-text"></h1>
+            <p>Olet kirjautunut sisään Kirppiskierrätys-palveluun.</p>
+        </div>
+    </div>
+
+    <footer class="d-flex justify-content-between align-items-center px-4">
+        <p class="mb-0 text-muted">Kirppiskierrätys</p>
+        <p class="mb-0 text-muted mx-auto">About us</p>
+        <div class="theme-button ms-auto">
+            <button class="theme-toggle-button" id="theme-toggle">Switch to Dark Mode</button>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
