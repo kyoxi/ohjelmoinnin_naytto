@@ -86,7 +86,7 @@ app.post('/api/items/:id/messages', async (req, res) => {
 app.delete('/api/items/:id', async (req, res) => {
     try {
         await db.run('DELETE FROM items WHERE id = ?', [req.params.id]);
-        res.json({ message: "Poistettu" });
+        res.json({ message: "Ilmoitus poistettu onnistuneesti!" });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
