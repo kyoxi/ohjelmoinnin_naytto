@@ -13,6 +13,20 @@ const App = {
     // Alustus
     async init() {
         console.log("App alustetaan...");
+       this:data.items = [
+           {
+               id: 1, 
+               owner: "Jari",
+                name: "Polkupyörä myynnissä",
+                desc: "Hyväkuntoinen maastopyörä, vähän käytetty.",
+                cat: "Myydään",
+                price: 120,
+                img: null,
+                date: "27.4.2026",
+                messages: []
+             }
+           ];
+
         if (this.data.currentUser) {
             this.showApp();
             await this.lataaPalvelimelta();
