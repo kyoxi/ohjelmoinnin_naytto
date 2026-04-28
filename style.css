@@ -3,7 +3,10 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f0f2f5;
+
+    background: linear-gradient(135deg, #dbeafe, #ffffff, #ede9fe);
+    background-size: 200% 200%;
+    animation: gradientMove 12s ease infinite;
 }
 
 .hidden { display: none !important; }
@@ -51,4 +54,9 @@ button {
     padding: 8px;
     border-radius: 6px;
     font-size: 0.9em;
+}
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
