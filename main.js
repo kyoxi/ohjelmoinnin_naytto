@@ -46,7 +46,17 @@ const App = {
                img: null,
                date: "27.4.2026",
                messages: []
-              
+             },
+             {
+               id: 4,
+               owner: "Antti",
+               name: "Ostetaan pelituoli",
+               desc: "Etsin hyväkuntoista pelituolia. Hinta noin 30–80€ kunnosta riippuen.",
+               cat: "Ostetaan",
+               price: "30–80",
+               img: null,
+               date: "27.4.2026",
+               messages: []
               }
             ];
 
