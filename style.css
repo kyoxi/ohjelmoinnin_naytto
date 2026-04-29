@@ -1,53 +1,104 @@
+/* PERUSASETUKSET */
 body {
-    font-family: 'Segoe UI', sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
 
+    /* TAUSTA */
     background: linear-gradient(135deg, #dbeafe, #ffffff, #ede9fe);
     background-size: 200% 200%;
     animation: gradientMove 12s ease infinite;
+
+    /* keskitys (valinnainen) */
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
 }
 
-.hidden { display: none !important; }
-
-.box {
+/* NAVIGOINTI */
+nav {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 64px;
 }
 
-input, textarea, select, button {
+nav h1 {
+    color: #2563eb;
+    font-style: italic;
+    font-weight: 900;
+    margin: 0;
+}
+
+/* APULUOKAT ASETTELUUN */
+.flex { display: flex !important; gap: 8px; align-items: center; }
+.hidden { display: none !important; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+.space-y-3 > * + * { margin-top: 0.75rem; }
+
+/* KORTIT JA LAATIKOT */
+.bg-white {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* TERVETULOA-LAATIKKO */
+.bg-gradient-to-br {
+    background: linear-gradient(135deg, #2563eb, #4338ca);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+}
+
+/* LOMAKKEET JA PAINIKKEET */
+input, textarea, select {
     width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    background-color: #f8fafc;
     box-sizing: border-box;
 }
 
 button {
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: bold;
     border: none;
+    transition: opacity 0.2s;
 }
 
-.nav { display: flex; gap: 10px; }
-.nav button { flex: 1; background: white; border: 1px solid #ddd; }
+button:hover { opacity: 0.9; }
 
-.tuote-kortti { border-left: 6px solid #ccc; }
+/* VÄRIT PAINIKKEILLE */
+.bg-blue-600 { background-color: #2563eb; color: white; }
+.bg-emerald-500 { background-color: #10b981; color: white; }
+.bg-red-50 { background-color: #fef2f2; color: #dc2626; }
 
-.kategoria-tag {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    color: white;
+/* PÄÄNÄKYMÄN ASETTELU (Desktop) */
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
 }
-
+/* VIESTIT */
 .viesti {
     background: #f9f9f9;
     margin-bottom: 5px;
@@ -55,8 +106,48 @@ button {
     border-radius: 6px;
     font-size: 0.9em;
 }
+
+/* ANIMAATIO */
 @keyframes gradientMove {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
+
+/* GRID */
+@media (min-width: 1024px) {
+    main {
+        grid-template-columns: 350px 1fr;
+    }
+}
+
+/* ILMOITUSKORTTI */
+#tuotelista > div {
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+/* PADDING */
+.p-5 { padding: 1.25rem; }
+
+/* KUVAT */
+img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+}
+
+/* TEKSTIT */
+.text-lg { font-size: 1.25rem; font-weight: bold; }
+.text-slate-500 { color: #64748b; font-size: 0.9rem; }
+.text-emerald-600 { color: #059669; font-weight: 800; }
+
+/* VIESTI BOX */
+.bg-blue-50 { 
+    background-color: #eff6ff; 
+    border-left: 3px solid #3b82f6; 
+}
+
