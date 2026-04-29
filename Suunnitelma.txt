@@ -6,19 +6,28 @@ Tekijät:
 Toni Barck
 Jesse Paajanen
 
+Näytön ajanjakso 16.4-30.4.2026
+
 Projekti:
 Tavoitteena on luoda kirpputori/tavaranvaihto sivusto. Sivusto vaatii rekisteröitymisen, jotta käyttäjä
 voi kerätä profiiliinsa julkaisemansa ilmoitukset sekä näin mahdollistetaan myös käyttäjien välinen viestintä 
 ilmoituksissa.
 
 Sivustolle luodaan ilmoituksille kategoriat: ostetaan, myydään, annetaan ja vuokrataan, joihin käyttäjä
-voi ilmoituksen lisätä ja selata ilmoituksia.
+voi ilmoituksen lisätä ja selata ilmoituksia. Käyttäjät voivat viestien välityksellä käydä keskustelua tuotteista ja sopia kaupoista.
+
+Olemme keskenämmä sopineet, ettei projektista tehdä liian suurta ja tavoitteenamme on saada projekti tehdyksi kahdessa viikossa. Yhteyttä pidämme projektin edetessä Teams:in avulla, näin mahdollistetaan molempien työskentely itselle parhaimpaan aikaan. 
 
 Työnjako (suuntaa antava):
-Toni:
-Jesse
 
-Frontend: HTML5, Tailwind CSS, JavaScript (Async/Await)
-Backend: Node.js, Express
-Tietokanta: SQLite (JSON-pohjainen viestien tallennus)
-Kuvat: Base64-enkoodaus
+Toni: Kirjautuminen ja rekisteröinti, viestiominaisuudet, 
+
+Jesse: Kategoriat ja ulkoasu, 
+
+Tekninen toteutus:
+Projekti tehdään Visual Coden ja Githubin avulla, näin mahdollistamme molemmille
+projektin tekemisen omien aikataulujen mukaan. Projektin edetessä koodia testataan ja korjataan.
+Tarvittaessa ominaisuuksia lisätään/poistetaan. 
+Ojelmointi toteutetaan rakenteellisesti, jotta se on toimivaa ja sitä voidaan helposti käsitellä sekä ylläpitää.
+Suunnitelman pohjalta projektia viedään eteenpäin ja myös kehitetään paremmaksi.
+
