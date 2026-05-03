@@ -82,6 +82,26 @@ app.post('/api/items/:id/messages', async (req, res) => {
     }
 });
 
+// API: Päivitä ilmoituksen tiedot (esim. viestien poisto)
+app.put('/api/items/:id', async (req, res) => {
+    try {
+        const { messages } = req.body;
+        // Päivitetään vain viestit-sarake tietokannassa
+        const result = await db.run(
+            'UPDATE items SET messages = ? WHERE id = ?',
+            [JSON.stringify(messages), req.params.id]
+        );
+
+        if (result.changes > 0) {
+            res.json({ message: "Ilmoitus päivitetty onnistuneesti" });
+        } else {
+            res.status(404).json({ error: "Ilmoitusta ei löytynyt" });
+        }
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // API: Poista ilmoitus
 app.delete('/api/items/:id', async (req, res) => {
     try {

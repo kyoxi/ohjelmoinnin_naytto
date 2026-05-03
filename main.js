@@ -13,59 +13,11 @@ const App = {
     // Alustus
     async init() {
         console.log("App alustetaan...");
-       this.data.items = [
-           {
-               id: 1, 
-               owner: "Jari",
-                name: "Polkupyörä myynnissä",
-                desc: "Hyväkuntoinen maastopyörä, vähän käytetty.",
-                cat: "Myydään",
-                price: 120,
-                img: null,
-                date: "27.4.2026",
-                messages: []
-            },
-            {
-               id: 2,
-               owner: "Laura",
-               name: "Sohva annetaan",
-               desc: "Siisti sohva, nouto tänään.",
-               cat: "Annetaan",
-               price: null,
-               img: null,
-               date: "27.4.2026",
-               messages: []
-               },
-              {
-               id: 3,
-               owner: "Mikko",
-               name: "PlayStation 5 myynnissä",
-               desc: "Hyväkuntoinen PS5, mukaan yksi ohjain ja pelejä. Toimii moitteettomasti.",
-               cat: "Myydään",
-               price: 450,
-               img: null,
-               date: "27.4.2026",
-               messages: []
-             },
-             {
-               id: 4,
-               owner: "Antti",
-               name: "Ostetaan pelituoli",
-               desc: "Etsin hyväkuntoista pelituolia. Hinta noin 30–80€ kunnosta riippuen.",
-               cat: "Ostetaan",
-               price: "30–80",
-               img: null,
-               date: "27.4.2026",
-               messages: []
-              }
-            ];
-
+        
         if (this.data.currentUser) {
             this.showApp();
-            this.renderList('kaikki');
-           
+            await this.lataaPalvelimelta();
         }
-        this.tarkistaHinta();
     },
 
     // --- PALVELINYHTEYDET ---
@@ -76,16 +28,15 @@ const App = {
             if (!response.ok) throw new Error("Haku epäonnistui");
             this.data.items = await response.json();
             
-            // Selvitetään mikä sivu on auki
             const otsikkoElem = document.getElementById('listan-otsikko');
+            const otsikko = otsikkoElem ? otsikkoElem.innerText : '';
             let moodi = 'kaikki';
-            if (otsikkoElem) {
-                if (otsikkoElem.innerText.includes('Omat ilmoituksesi')) moodi = 'omat';
-                if (otsikkoElem.innerText.includes('Omat keskustelusi')) moodi = 'viestit';
-            }
+            if (otsikko.includes('Omat ilmoituksesi')) moodi = 'omat';
+            if (otsikko.includes('Omat keskustelusi')) moodi = 'viestit';
+            
             this.renderList(moodi);
         } catch (e) {
-            console.error("Virhe ladattaessa ilmoituksia:", e);
+            console.error("Virhe ladattaessa:", e);
         } finally {
             this.setLoading(false);
         }
@@ -109,7 +60,7 @@ const App = {
         this.data.currentUser = u;
         sessionStorage.setItem('k_user', u);
         this.showApp();
-        this.renderList('kaikki');
+        this.lataaPalvelimelta();
     },
 
     logout() {
@@ -117,7 +68,17 @@ const App = {
         location.reload();
     },
 
-    // --- ILMOITUSTEN JA VIESTIEN HALLINTA ---
+    showApp() {
+        const auth = document.getElementById('auth-section');
+        const main = document.getElementById('main-section');
+        const userDisp = document.getElementById('user-display');
+
+        if (auth) auth.classList.add('hidden');
+        if (main) main.classList.remove('hidden');
+        if (userDisp) userDisp.innerText = this.data.currentUser;
+    },
+
+    // --- TOIMINNALLISUUDET ---
     async lisaaIlmoitus() {
         const nimi = document.getElementById('p-nimi').value.trim();
         const kuvaus = document.getElementById('p-kuvaus').value.trim();
@@ -127,34 +88,33 @@ const App = {
 
         if (!nimi || !kuvaus) return alert("Täytä pakolliset kentät!");
 
-        this.setLoading(true);
         let imgBase64 = null;
-        if (kuvaInput.files && kuvaInput.files.length > 0) {
+        if (kuvaInput.files && kuvaInput.files[0]) {
             imgBase64 = await this.fileToBase64(kuvaInput.files[0]);
         }
 
-        const uusiIlmoitus = {
+        const uusi = {
             owner: this.data.currentUser,
             name: nimi,
             desc: kuvaus,
             cat: kategoria,
             price: (kategoria === "Myydään" || kategoria === "Vuokrataan") ? hinta : null,
             img: imgBase64,
-            date: new Date().toLocaleDateString('fi-FI')
+            date: new Date().toLocaleDateString('fi-FI'),
+            messages: []
         };
 
         try {
-            const response = await fetch(`${API_URL}/items`, {
+            const res = await fetch(`${API_URL}/items`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(uusiIlmoitus)
+                body: JSON.stringify(uusi)
             });
-            if (response.ok) {
+            if (res.ok) {
                 this.tyhjennaLomake();
                 await this.lataaPalvelimelta();
             }
-        } catch (e) { alert("Tallennus epäonnistui"); }
-        this.setLoading(false);
+        } catch (e) { alert("Virhe tallennuksessa"); }
     },
 
     async lahetaViesti(id) {
@@ -162,68 +122,79 @@ const App = {
         const teksti = inp.value.trim();
         if (!teksti) return;
 
-        const item = this.data.items.find(i => i.id === id);
-        const viesti = { 
-            from: this.data.currentUser, 
-            txt: teksti,
-            to: item.owner 
-        };
+        const item = this.data.items.find(i => i.id == id);
+        const viesti = { from: this.data.currentUser, txt: teksti, to: item.owner };
 
         try {
-            const response = await fetch(`${API_URL}/items/${id}/messages`, {
+            const res = await fetch(`${API_URL}/items/${id}/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(viesti)
             });
-            if (response.ok) {
+            if (res.ok) {
                 inp.value = '';
                 await this.lataaPalvelimelta();
             }
-        } catch (e) { alert("Viestin lähetys epäonnistui"); }
-    },
-
-    async vastaa(itemId, vastapuoli) {
-        const teksti = prompt(`Vastaa käyttäjälle ${vastapuoli}:`);
-        if (!teksti) return;
-
-        const viesti = { 
-            from: this.data.currentUser, 
-            txt: teksti,
-            to: vastapuoli 
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/items/${itemId}/messages`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(viesti)
-            });
-            if (response.ok) await this.lataaPalvelimelta();
-        } catch (e) { alert("Vastaus epäonnistui"); }
+        } catch (e) { alert("Viesti ei kulkenut"); }
     },
 
     async poista(id) {
-        if (!confirm("Haluatko varmasti poistaa ilmoituksen?")) return;
+        if (!confirm("Poistetaanko ilmoitus?")) return;
         try {
-            const response = await fetch(`${API_URL}/items/${id}`, { method: 'DELETE' });
-            if (response.ok) await this.lataaPalvelimelta();
+            await fetch(`${API_URL}/items/${id}`, { method: 'DELETE' });
+            await this.lataaPalvelimelta();
         } catch (e) { alert("Poisto epäonnistui"); }
     },
 
-    // --- UI RENDERÖINTI ---
+    // UUSI: Viestin poistaminen (Admin tai oma viesti)
+    async poistaViesti(itemId, index) {
+        if (!confirm("Haluatko varmasti poistaa tämän viestin?")) return;
+
+        const item = this.data.items.find(i => i.id == itemId);
+        if (!item) return;
+
+        const uudetViestit = [...item.messages];
+        uudetViestit.splice(index, 1);
+
+        try {
+            const res = await fetch(`${API_URL}/items/${itemId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: uudetViestit })
+            });
+
+            if (res.ok) {
+                await this.lataaPalvelimelta();
+            }
+        } catch (e) {
+            alert("Viestin poisto epäonnistui");
+        }
+    },
+
+    // --- UI JA RENDERÖINTI ---
+    naytaSivu(moodi) {
+        this.renderList(moodi);
+    },
+
+    suodata() {
+        this.data.searchTerm = document.getElementById('haku-kentta').value.toLowerCase();
+        this.data.activeFilter = document.getElementById('suodatin-kategoria').value;
+        this.renderList('kaikki');
+    },
+
     renderList(moodi) {
         const container = document.getElementById('tuotelista');
         const otsikko = document.getElementById('listan-otsikko');
-        if (!container || !otsikko) return;
+        if (!container) return;
 
         container.innerHTML = '';
-        let naytettavat = this.data.items;
+        let naytettavat = [...this.data.items];
 
         if (moodi === 'omat') {
-            naytettavat = this.data.items.filter(i => i.owner === this.data.currentUser);
+            naytettavat = naytettavat.filter(i => i.owner === this.data.currentUser);
             otsikko.innerText = "Omat ilmoituksesi";
         } else if (moodi === 'viestit') {
-            naytettavat = this.data.items.filter(i => 
+            naytettavat = naytettavat.filter(i => 
                 i.owner === this.data.currentUser || 
                 i.messages.some(m => m.from === this.data.currentUser || m.to === this.data.currentUser)
             );
@@ -232,7 +203,6 @@ const App = {
             otsikko.innerText = "Tuoreimmat ilmoitukset";
         }
 
-        // Suodatus haku- ja kategoriakenttien mukaan
         if (this.data.activeFilter !== 'kaikki') {
             naytettavat = naytettavat.filter(i => i.cat === this.data.activeFilter);
         }
@@ -243,86 +213,71 @@ const App = {
             );
         }
 
-        if (naytettavat.length === 0) {
-            container.innerHTML = `<div class="bg-white p-10 text-center rounded-2xl border-2 border-dashed text-slate-400">Ei ilmoituksia 😕</div>`;
-            return;
-        }
-
         naytettavat.forEach(item => {
-            const omatViestit = item.messages.filter(m => 
-                m.from === this.data.currentUser || m.to === this.data.currentUser || item.owner === this.data.currentUser
-            );
-
-            const viestitHtml = omatViestit.map(m => `
-                <div class="p-3 rounded-xl mb-2 ${m.from === this.data.currentUser ? 'bg-blue-50 border-l-4 border-blue-400 ml-4' : 'bg-slate-100 mr-4'}">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wide ${m.from === this.data.currentUser ? 'text-blue-600' : 'text-slate-500'}">
-                            ${m.from} -> ${m.to || 'Myyjä'}
-                        </span>
-                        ${(item.owner === this.data.currentUser && m.from !== this.data.currentUser) ? 
-                            `<button onclick="App.vastaa(${item.id}, '${m.from}')" class="text-[9px] bg-white border px-2 py-1 rounded shadow-sm hover:bg-blue-600 hover:text-white transition">Vastaa</button>` : ''}
-                    </div>
-                    <p class="text-sm">${m.txt}</p>
-                </div>
-            `).join('');
-
-            const card = document.createElement('div');
-            card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6";
-            card.innerHTML = `
-                ${item.img ? `<img src="${item.img}" class="w-full h-48 object-cover">` : ''}
-                <div class="p-5">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-[10px] font-bold px-2 py-1 rounded bg-slate-100 uppercase">${item.cat}</span>
-                            <h3 class="text-xl font-bold mt-2">${item.name} ${item.price ? `<span class="text-emerald-600 ml-1">${item.price}€</span>` : ''}</h3>
-                        </div>
-                        <small class="text-slate-400 font-medium">Myyjä: ${item.owner}</small>
-                    </div>
-                    <p class="text-slate-500 text-sm mt-3">${item.desc}</p>
-                    
-                    <div class="mt-6 pt-6 border-t border-slate-100">
-                        <h4 class="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">Keskustelu</h4>
-                        <div class="space-y-1">${viestitHtml || '<p class="text-xs text-slate-300 italic">Ei viestejä vielä.</p>'}</div>
-                        
-                        <div class="flex gap-2 mt-4">
-                            <input type="text" id="in-${item.id}" placeholder="Kirjoita viesti..." class="flex-1 p-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                            <button onclick="App.lahetaViesti(${item.id})" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-100">Lähetä</button>
-                        </div>
-
-                        ${item.owner === this.data.currentUser ? `
-                            <button onclick="App.poista(${item.id})" class="mt-4 w-full text-red-500 text-[10px] font-bold py-2 border border-red-50 rounded-xl hover:bg-red-50 transition">Poista ilmoitus</button>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
+            container.innerHTML += this.renderItem(item);
         });
     },
 
-    // --- APUFUNKTIOT ---
-    suodata() {
-        this.data.activeFilter = document.getElementById('suodatin-kategoria').value;
-        this.data.searchTerm = document.getElementById('haku-kentta').value.toLowerCase().trim();
-        const otsikko = document.getElementById('listan-otsikko')?.innerText || '';
-        let moodi = 'kaikki';
-        if (otsikko.includes('Omat ilmoituksesi')) moodi = 'omat';
-        if (otsikko.includes('Omat keskustelusi')) moodi = 'viestit';
-        this.renderList(moodi);
+    renderItem(item) {
+        const isOwner = item.owner === this.data.currentUser;
+        const isAdmin = this.data.currentUser === 'admin';
+
+        return `
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-500">${item.cat}</span>
+                        <h3 class="text-xl font-bold text-slate-800">${item.name}</h3>
+                        <p class="text-slate-500 text-sm">Julkaistu: ${item.date} • Myyjä: ${item.owner}</p>
+                    </div>
+                    ${item.price ? `<div class="text-2xl font-black text-blue-600">${item.price}€</div>` : ''}
+                </div>
+                <p class="text-slate-600 mb-4">${item.desc}</p>
+                ${item.img ? `<img src="${item.img}" class="w-full h-48 object-cover rounded-xl mb-4">` : ''}
+                
+                <div class="border-t pt-4">
+                    <div class="space-y-2 mb-4">
+                        ${item.messages.map((m, index) => `
+                            <div class="text-sm p-2 rounded-lg relative ${m.from === this.data.currentUser ? 'bg-blue-50 ml-4' : 'bg-slate-50 mr-4'}">
+                                <strong>${m.from}:</strong> ${m.txt}
+                                ${(isAdmin || m.from === this.data.currentUser) ? `
+                                    <button onclick="App.poistaViesti(${item.id}, ${index})" 
+                                            class="absolute top-1 right-2 text-red-400 hover:text-red-600 font-bold" title="Poista viesti">
+                                        ×
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="in-${item.id}" placeholder="Lähetä viesti..." class="flex-1 p-2 bg-slate-50 border rounded-lg outline-none">
+                        <button onclick="App.lahetaViesti(${item.id})" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Lähetä</button>
+                        ${isOwner || isAdmin ? `<button onclick="App.poista(${item.id})" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100">Poista</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
     },
 
-    showApp() {
-        document.getElementById('auth-section')?.classList.add('hidden');
-        document.getElementById('main-section')?.classList.remove('hidden');
-        const display = document.getElementById('user-display');
-        if (display) display.innerText = this.data.currentUser;
+    // Aputoiminnot
+    setLoading(s) {
+        const l = document.getElementById('loading-indicator');
+        if (l) l.classList.toggle('hidden', !s);
     },
 
     tarkistaHinta() {
-        const kElem = document.getElementById('p-kategoria');
-        const hContainer = document.getElementById('hinta-container');
-        if (kElem && hContainer) {
-            hContainer.style.display = (kElem.value === 'Myydään' || kElem.value === 'Vuokrataan') ? 'block' : 'none';
-        }
+        const kat = document.getElementById('p-kategoria').value;
+        const cont = document.getElementById('hinta-container');
+        if (cont) cont.style.display = (kat === "Myydään" || kat === "Vuokrataan") ? 'block' : 'none';
+    },
+
+    fileToBase64(file) {
+        return new Promise((r, j) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => r(reader.result);
+            reader.onerror = e => j(e);
+        });
     },
 
     tyhjennaLomake() {
@@ -330,23 +285,7 @@ const App = {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
-    },
-
-    fileToBase64(file) {
-        return new Promise(res => {
-            const r = new FileReader();
-            r.onload = () => res(r.result);
-            r.readAsDataURL(file);
-        });
-    },
-
-    setLoading(s) { 
-        const loader = document.getElementById('loading-indicator');
-        if (loader) loader.classList.toggle('hidden', !s); 
-    },
-
-    naytaSivu(m) { this.renderList(m); }
+    }
 };
 
-// Käynnistys
-App.init();
+window.onload = () => App.init();
