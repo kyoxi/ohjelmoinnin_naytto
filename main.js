@@ -7,7 +7,8 @@ const App = {
         items: [], 
         currentUser: sessionStorage.getItem('k_user') || null,
         activeFilter: 'kaikki',
-        searchTerm: ''
+        searchTerm: '',
+        activeChatUser: null
     },
 
     // Alustus
