@@ -173,8 +173,20 @@ const App = {
     },
 
     // --- UI JA RENDERÖINTI ---
-    naytaSivu(moodi) {
-        this.renderList(moodi);
+    naytaSivu(m) {
+    const chat = document.getElementById('chat-section');
+    const lista = document.getElementById('tuotelista');
+
+    if (m === 'viestit') {
+        chat.classList.remove('hidden');
+        lista.classList.add('hidden');
+        this.renderChatList();
+    } else {
+        chat.classList.add('hidden');
+        lista.classList.remove('hidden');
+        this.renderList(m);
+    }
+},
     },
 
     suodata() {
